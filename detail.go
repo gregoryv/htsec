@@ -40,18 +40,6 @@ func (s *Detail) GuardURL(name string) (string, error) {
 	return g.AuthCodeURL(state), nil
 }
 
-// guard returns named service if included, error if not found.
-func (s *Detail) guard(name string) (*Guard, error) {
-	g, found := s.guards[name]
-	if !found {
-		err := fmt.Errorf("guard %v: %w", name, notFound)
-		return nil, err
-	}
-	return g, nil
-}
-
-var notFound = fmt.Errorf("not found")
-
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
@@ -82,6 +70,18 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 	}
 	return &slip, nil
 }
+
+// guard returns named service if included, error if not found.
+func (s *Detail) guard(name string) (*Guard, error) {
+	g, found := s.guards[name]
+	if !found {
+		err := fmt.Errorf("guard %v: %w", name, notFound)
+		return nil, err
+	}
+	return g, nil
+}
+
+var notFound = fmt.Errorf("not found")
 
 // verify USE.RANDOM.SIGNATURE
 func (s *Detail) verify(state string) error {
