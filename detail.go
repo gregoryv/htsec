@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strings"
@@ -34,7 +33,7 @@ func (s *Detail) GuardURL(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	state, err := s.newState(name)
+	state, err := g.newState(s)
 	if err != nil {
 		return "", err
 	}
@@ -52,21 +51,6 @@ func (s *Detail) guard(name string) (*Guard, error) {
 }
 
 var notFound = fmt.Errorf("not found")
-
-// newState returns a string GUARDNAME.RANDOM.SIGNATURE using som private
-func (s *Detail) newState(guardname string) (string, error) {
-	// see https://stackoverflow.com/questions/26132066/\
-	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
-	randomBytes := make([]byte, 32)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return "", err
-	}
-	// both random value and the signature must be usable in a url
-	random := hex.EncodeToString(randomBytes)
-	signature := s.sign(random)
-	return guardname + "." + random + "." + signature, nil
-}
 
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
