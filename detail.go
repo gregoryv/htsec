@@ -30,7 +30,7 @@ type Detail struct {
 
 // GuardURL returns url to the gate.
 func (s *Detail) GuardURL(name string) (string, error) {
-	svc, err := s.gate(name)
+	g, err := s.guard(name)
 	if err != nil {
 		return "", err
 	}
@@ -38,23 +38,23 @@ func (s *Detail) GuardURL(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return svc.AuthCodeURL(state), nil
+	return g.AuthCodeURL(state), nil
 }
 
-// Gate returns named service if included, error if not found.
-func (s *Detail) gate(name string) (*Guard, error) {
-	a, found := s.guards[name]
+// guard returns named service if included, error if not found.
+func (s *Detail) guard(name string) (*Guard, error) {
+	g, found := s.guards[name]
 	if !found {
-		err := fmt.Errorf("Secure.AuthService %v: %w", name, notFound)
+		err := fmt.Errorf("guard %v: %w", name, notFound)
 		return nil, err
 	}
-	return a, nil
+	return g, nil
 }
 
 var notFound = fmt.Errorf("not found")
 
-// NewState returns a string use.RANDOM.SIGNATURE using som private
-func (s *Detail) newState(use string) (string, error) {
+// newState returns a string GUARDNAME.RANDOM.SIGNATURE using som private
+func (s *Detail) newState(guardname string) (string, error) {
 	// see https://stackoverflow.com/questions/26132066/\
 	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
 	randomBytes := make([]byte, 32)
@@ -65,7 +65,7 @@ func (s *Detail) newState(use string) (string, error) {
 	// both random value and the signature must be usable in a url
 	random := hex.EncodeToString(randomBytes)
 	signature := s.sign(random)
-	return use + "." + random + "." + signature, nil
+	return guardname + "." + random + "." + signature, nil
 }
 
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
@@ -75,7 +75,7 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 		return nil, err
 	}
 	// which auth service was used
-	auth, err := s.gate(s.parseUse(state))
+	auth, err := s.guard(s.parseUse(state))
 	if err != nil {
 		return nil, err
 	}
