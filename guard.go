@@ -7,6 +7,9 @@ import (
 )
 
 type Guard struct {
+	// A short name for use during login
+	Name string
+
 	// Used for the oauth2 flow
 	*oauth2.Config
 

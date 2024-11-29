@@ -14,6 +14,7 @@ import (
 
 func Guard() *htsec.Guard {
 	return &htsec.Guard{
+		Name: "google",
 		Config: &oauth2.Config{
 			RedirectURL:  os.Getenv("OAUTH_GOOGLE_REDIRECT_URI"),
 			ClientID:     os.Getenv("OAUTH_GOOGLE_CLIENTID"),

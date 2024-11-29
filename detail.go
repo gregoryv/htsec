@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -17,9 +16,8 @@ func NewDetail(guards ...*Guard) *Detail {
 		PrivateKey: make([]byte, 32),
 		guards:     make(map[string]*Guard),
 	}
-	for _, gate := range guards {
-		name := domainName(gate.Endpoint.AuthURL)
-		s.guards[name] = gate
+	for _, g := range guards {
+		s.guards[g.Name] = g
 	}
 	_, _ = rand.Read(s.PrivateKey)
 	return &s
@@ -28,15 +26,6 @@ func NewDetail(guards ...*Guard) *Detail {
 type Detail struct {
 	PrivateKey []byte
 	guards     map[string]*Guard
-}
-
-func domainName(uri string) string {
-	v, err := url.Parse(uri)
-	if err != nil {
-		panic(err.Error())
-	}
-	parts := strings.Split(v.Hostname(), ".")
-	return parts[len(parts)-2]
 }
 
 // GuardURL returns url to the gate.
