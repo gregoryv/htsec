@@ -17,10 +17,12 @@ type Guard struct {
 
 	// Used to read contact information once authorized
 	Contact func(client *http.Client) (*Contact, error)
+
+	sec *Detail
 }
 
 // newState returns a string GUARDNAME.RANDOM.SIGNATURE using som private
-func (g *Guard) newState(sec *Detail) (string, error) {
+func (g *Guard) newState() (string, error) {
 	// see https://stackoverflow.com/questions/26132066/\
 	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
 	randomBytes := make([]byte, 32)
@@ -30,6 +32,15 @@ func (g *Guard) newState(sec *Detail) (string, error) {
 	}
 	// both random value and the signature must be usable in a url
 	random := hex.EncodeToString(randomBytes)
-	signature := sec.sign(random)
+	signature := g.sec.sign(random)
 	return g.Name + "." + random + "." + signature, nil
+}
+
+// GuardURL returns url to the gate.
+func (g *Guard) URL() (string, error) {
+	state, err := g.newState()
+	if err != nil {
+		return "", err
+	}
+	return g.AuthCodeURL(state), nil
 }

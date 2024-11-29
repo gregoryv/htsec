@@ -14,10 +14,10 @@ func ExampleDetail() {
 		google.Guard(),
 	)
 
-	url, _ := sec.GuardURL("google")
+	url, _ := sec.Guard("google").URL()
 	fmt.Println(url[:104] + "...") // exclude signed random part
 
-	url, _ = sec.GuardURL("github")
+	url, _ = sec.Guard("github").URL()
 	fmt.Println(url[:83] + "...")
 	// output:
 	// https://accounts.google.com/o/oauth2/auth?client_id=&response_type=code&scope=profile+email&state=google...

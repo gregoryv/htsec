@@ -16,6 +16,7 @@ func NewDetail(guards ...*Guard) *Detail {
 		guards:     make(map[string]*Guard),
 	}
 	for _, g := range guards {
+		g.sec = &s
 		s.guards[g.Name] = g
 	}
 	_, _ = rand.Read(s.PrivateKey)
@@ -28,17 +29,11 @@ type Detail struct {
 }
 
 // GuardURL returns url to the gate.
-func (s *Detail) GuardURL(name string) (string, error) {
-	g, err := s.guard(name)
-	if err != nil {
-		return "", err
-	}
-	state, err := g.newState(s)
-	if err != nil {
-		return "", err
-	}
-	return g.AuthCodeURL(state), nil
+func (s *Detail) Guard(name string) *Guard {
+	return s.guard(name)
 }
+
+var unknown = &Guard{}
 
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
@@ -47,11 +42,13 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 		return nil, err
 	}
 	// which auth service was used
-	auth, err := s.guard(s.parseUse(state))
-	if err != nil {
-		return nil, err
+	name := s.parseUse(state)
+	g := s.guard(name)
+	if g == unknown {
+		return nil, fmt.Errorf("guard %q: %w", name, notFound)
 	}
 	// get the token
+	auth := g.Config
 	token, err := auth.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
@@ -59,7 +56,7 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 
 	client := auth.Client(ctx, token)
 	// get user information from the Auth service
-	contact, err := auth.Contact(client)
+	contact, err := g.Contact(client)
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +69,12 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 }
 
 // guard returns named service if included, error if not found.
-func (s *Detail) guard(name string) (*Guard, error) {
+func (s *Detail) guard(name string) *Guard {
 	g, found := s.guards[name]
 	if !found {
-		err := fmt.Errorf("guard %v: %w", name, notFound)
-		return nil, err
+		return unknown
 	}
-	return g, nil
+	return g
 }
 
 var notFound = fmt.Errorf("not found")
