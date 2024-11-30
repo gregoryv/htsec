@@ -45,13 +45,12 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 		return nil, err
 	}
 	// get the token
-	auth := g.Config
-	token, err := auth.Exchange(ctx, code)
+	token, err := g.Config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}
 
-	client := auth.Client(ctx, token)
+	client := g.Config.Client(ctx, token)
 	// get user information from the Auth service
 	contact, err := g.Contact(client)
 	if err != nil {

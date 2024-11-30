@@ -23,6 +23,33 @@ func TestDetail_GuardURL(t *testing.T) {
 	}
 }
 
+func TestDetail_Authorize(t *testing.T) {
+	g := &Guard{
+		Name: "a",
+		Config: &oauth2.Config{
+			RedirectURL:  "http://example.com/redirect",
+			ClientID:     "abc",
+			ClientSecret: "secret",
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  "http://127.0.0.1/auth",
+				TokenURL: "http://127.0.0.1/token",
+			},
+		},
+	}
+	sec := NewDetail(g)
+	ctx := context.Background()
+	state, err := g.newState()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := "/callback?code=hepp&state=" + state
+	r, _ := http.NewRequest("GET", path, http.NoBody)
+
+	if _, err := sec.Authorize(ctx, r); err == nil {
+		t.Error(err)
+	}
+}
+
 func TestDetail_Authorize_stateErr(t *testing.T) {
 	sec := NewDetail(
 		&Guard{Name: "a", Config: &oauth2.Config{}},
