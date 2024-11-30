@@ -3,6 +3,7 @@ package htsec
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 
 	"golang.org/x/oauth2"
@@ -36,11 +37,18 @@ func (g *Guard) newState() (string, error) {
 	return g.Name + "." + random + "." + signature, nil
 }
 
-// GuardURL returns url to the gate.
-func (g *Guard) URL() (string, error) {
+// url returns url including state using oauth2 AuthCodeURL
+func (g *Guard) url() (string, error) {
 	state, err := g.newState()
 	if err != nil {
 		return "", err
 	}
+	if g.Config == nil {
+		return "", fmt.Errorf("%v: missing Config", g)
+	}
 	return g.AuthCodeURL(state), nil
+}
+
+func (g *Guard) String() string {
+	return fmt.Sprintf("guard %s", g.Name)
 }

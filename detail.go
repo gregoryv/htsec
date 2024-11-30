@@ -29,11 +29,13 @@ type Detail struct {
 }
 
 // GuardURL returns url to the gate.
-func (s *Detail) Guard(name string) *Guard {
-	return s.guard(name)
+func (s *Detail) GuardURL(name string) (string, error) {
+	g, err := s.guard(name)
+	if err != nil {
+		return "", fmt.Errorf("GuardURL: %w", err)
+	}
+	return g.url()
 }
-
-var unknown = &Guard{Name: "unknown"}
 
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
@@ -64,13 +66,15 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 }
 
 // guard returns named service if included, error if not found.
-func (s *Detail) guard(name string) *Guard {
+func (s *Detail) guard(name string) (*Guard, error) {
 	g, found := s.guards[name]
 	if !found {
-		return unknown
+		return nil, fmt.Errorf("guard %s: %w", name, notFound)
 	}
-	return g
+	return g, nil
 }
+
+var notFound = fmt.Errorf("not found")
 
 // verify GUARDNAME.RAND.SIGNATURE
 func (s *Detail) verify(state string) (*Guard, error) {
@@ -80,9 +84,9 @@ func (s *Detail) verify(state string) (*Guard, error) {
 	}
 	// check if guard is part of the security detail
 	name := parts[0]
-	g := s.guard(name)
-	if g == unknown {
-		return nil, fmt.Errorf("state guard %q: unknown", name)
+	g, err := s.guard(name)
+	if err != nil {
+		return nil, err
 	}
 	signature := s.sign(parts[1])
 	if signature != parts[2] {

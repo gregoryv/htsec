@@ -6,18 +6,19 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+
+	"golang.org/x/oauth2"
 )
 
-func TestDetail_Guard(t *testing.T) {
+func TestDetail_GuardURL(t *testing.T) {
 	sec := NewDetail(
-		&Guard{Name: "a"},
-		&Guard{Name: "b"},
+		&Guard{Name: "a", Config: &oauth2.Config{}},
 	)
-	if g := sec.Guard("a"); g.Name != "a" {
-		t.Error("named guard should exist")
+	if _, err := sec.GuardURL("a"); err != nil {
+		t.Error(err)
 	}
-	if g := sec.Guard("john"); g.Name != "unknown" {
-		t.Error("invalid unknown guard", g.Name)
+	if _, err := sec.GuardURL("john"); err == nil {
+		t.Error("unknown guard should fail")
 	}
 }
 
