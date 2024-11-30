@@ -80,17 +80,17 @@ var notFound = fmt.Errorf("not found")
 func (s *Detail) verify(state string) (*Guard, error) {
 	parts := strings.Split(state, ".")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("state: invalid format")
+		return nil, fmt.Errorf("%w: invalid format", ErrState)
 	}
 	// check if guard is part of the security detail
 	name := parts[0]
 	g, err := s.guard(name)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %w", ErrState, err)
 	}
 	signature := s.sign(parts[1])
 	if signature != parts[2] {
-		return nil, fmt.Errorf("state: invalid signature")
+		return nil, fmt.Errorf("%w: invalid signature", ErrState)
 	}
 	return g, nil
 }
@@ -101,3 +101,8 @@ func (s *Detail) sign(random string) string {
 	hash.Write(s.PrivateKey)
 	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
+
+var (
+	// ErrState indicates something in the state data is invalid
+	ErrState = fmt.Errorf("state")
+)

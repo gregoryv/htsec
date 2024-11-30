@@ -2,6 +2,7 @@ package htsec
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -22,16 +23,36 @@ func TestDetail_GuardURL(t *testing.T) {
 	}
 }
 
-func TestDetail_Authorize(t *testing.T) {
-	sec := NewDetail()
+func TestDetail_Authorize_stateErr(t *testing.T) {
+	sec := NewDetail(
+		&Guard{Name: "a", Config: &oauth2.Config{}},
+	)
 	ctx := context.Background()
-	path := "/callback?state=NAME.RAND.SIGN"
-	r, _ := http.NewRequest("GET", path, http.NoBody)
-
-	_, err := sec.Authorize(ctx, r)
-	if err := contains(err.Error(), "NAME"); err != nil {
-		t.Error("error message:", err)
+	cases := map[string]string{
+		"x.RAND.SIGN": "x",
+		"a.RAND.SIGN": "invalid signature",
+		"a.b":         "invalid format",
 	}
+	for state, expect := range cases {
+		t.Run(state, func(t *testing.T) {
+			path := "/callback?state=" + state
+			r, _ := http.NewRequest("GET", path, http.NoBody)
+
+			_, err := sec.Authorize(ctx, r)
+			if err := stateErr(err, expect); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+// ----------------------------------------
+
+func stateErr(err error, expect ...string) error {
+	if !errors.Is(err, ErrState) {
+		return fmt.Errorf("expected error type %T", ErrState)
+	}
+	return contains(err.Error(), expect...)
 }
 
 func contains(got string, expect ...string) error {
