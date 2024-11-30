@@ -14,8 +14,8 @@ func Guard() *htsec.Guard {
 	return &htsec.Guard{
 		Name: "github",
 		Config: &oauth2.Config{
-			RedirectURL:  os.Getenv("OAUTH_GITHUB_REDIRECT_URI"),
-			ClientID:     os.Getenv("OAUTH_GITHUB_CLIENTID"),
+			RedirectURL:  os.Getenv("OAUTH_GITHUB_REDIRECT_URL"),
+			ClientID:     os.Getenv("OAUTH_GITHUB_CLIENT_ID"),
 			ClientSecret: os.Getenv("OAUTH_GITHUB_SECRET"),
 			Endpoint:     endpoints.GitHub,
 		},
