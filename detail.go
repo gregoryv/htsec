@@ -33,7 +33,7 @@ func (s *Detail) Guard(name string) *Guard {
 	return s.guard(name)
 }
 
-var unknown = &Guard{}
+var unknown = &Guard{Name: "unknown"}
 
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
