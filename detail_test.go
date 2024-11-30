@@ -2,6 +2,7 @@ package htsec
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -23,12 +24,24 @@ func TestDetail_Guard(t *testing.T) {
 func TestDetail_Authorize(t *testing.T) {
 	sec := NewDetail()
 	ctx := context.Background()
-	r, _ := http.NewRequest(
-		"GET", "/callback?state=NAME.RAND.SIGN", http.NoBody,
-	)
+	path := "/callback?state=NAME.RAND.SIGN"
+	r, _ := http.NewRequest("GET", path, http.NoBody)
 
 	_, err := sec.Authorize(ctx, r)
-	if v := err.Error(); !strings.Contains(v, "NAME") {
-		t.Error("expect error to contain the guard name", v)
+	if err := contains(err.Error(), "NAME"); err != nil {
+		t.Error("error message:", err)
 	}
+}
+
+func contains(got string, expect ...string) error {
+	var miss []string
+	for _, exp := range expect {
+		if !strings.Contains(got, exp) {
+			miss = append(miss, exp)
+		}
+	}
+	if len(miss) > 0 {
+		return fmt.Errorf("missing %q", miss)
+	}
+	return nil
 }
