@@ -13,7 +13,7 @@ import (
 
 func TestDetail_GuardURL(t *testing.T) {
 	sec := NewDetail(
-		&Guard{Name: "a", Config: &oauth2.Config{}},
+		&Guard{Name: "a"},
 	)
 	if _, err := sec.GuardURL("a"); err != nil {
 		t.Error(err)
@@ -26,7 +26,7 @@ func TestDetail_GuardURL(t *testing.T) {
 func TestDetail_Authorize(t *testing.T) {
 	g := &Guard{
 		Name: "a",
-		Config: &oauth2.Config{
+		Config: oauth2.Config{
 			RedirectURL:  "http://example.com/redirect",
 			ClientID:     "abc",
 			ClientSecret: "secret",
@@ -49,7 +49,7 @@ func TestDetail_Authorize(t *testing.T) {
 
 func TestDetail_Authorize_stateErr(t *testing.T) {
 	sec := NewDetail(
-		&Guard{Name: "a", Config: &oauth2.Config{}},
+		&Guard{Name: "a"},
 	)
 	ctx := context.Background()
 	cases := map[string]string{
