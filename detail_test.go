@@ -49,6 +49,34 @@ func TestDetail_Authorize(t *testing.T) {
 	}
 }
 
+func TestDetail_Authorize_contactErr(t *testing.T) {
+	// fake oauth2 service
+	mx := http.NewServeMux()
+	mx.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("content-type", "application/json")
+		json.NewEncoder(w).Encode(map[string]any{
+			"access_token": "TOKEN",
+		})
+	})
+	srv := httptest.NewServer(mx)
+	defer srv.Close()
+
+	g := newTestGuard(srv)
+	broken := fmt.Errorf("broken")
+	g.Contact = func(*http.Client) (*Contact, error) {
+		return nil, broken
+	}
+	sec := NewDetail(g)
+	ctx := context.Background()
+	state := g.newState()
+	path := "/callback?code=hepp&state=" + state
+	r, _ := http.NewRequest("GET", path, http.NoBody)
+
+	if _, err := sec.Authorize(ctx, r); err != broken {
+		t.Error(err)
+	}
+}
+
 func TestDetail_Authorize_exchangeErr(t *testing.T) {
 	// fake oauth2 service
 	mx := http.NewServeMux()
