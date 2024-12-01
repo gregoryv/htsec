@@ -38,10 +38,7 @@ func TestDetail_Authorize(t *testing.T) {
 	}
 	sec := NewDetail(g)
 	ctx := context.Background()
-	state, err := g.newState()
-	if err != nil {
-		t.Fatal(err)
-	}
+	state := g.newState()
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 

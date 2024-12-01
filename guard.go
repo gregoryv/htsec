@@ -22,33 +22,29 @@ type Guard struct {
 	sec *Detail
 }
 
-// newState returns a string GUARDNAME.RANDOM.SIGNATURE using som private
-func (g *Guard) newState() (string, error) {
-	// see https://stackoverflow.com/questions/26132066/\
-	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
-	randomBytes := make([]byte, 32)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return "", err
-	}
-	// both random value and the signature must be usable in a url
-	random := hex.EncodeToString(randomBytes)
-	signature := g.sec.sign(random)
-	return g.Name + "." + random + "." + signature, nil
+func (g *Guard) String() string {
+	return fmt.Sprintf("guard %s", g.Name)
 }
 
 // url returns url including state using oauth2 AuthCodeURL
 func (g *Guard) url() (string, error) {
-	state, err := g.newState()
-	if err != nil {
-		return "", err
-	}
 	if g.Config == nil {
 		return "", fmt.Errorf("%v: missing Config", g)
 	}
+	state := g.newState()
 	return g.AuthCodeURL(state), nil
 }
 
-func (g *Guard) String() string {
-	return fmt.Sprintf("guard %s", g.Name)
+// newState returns a string GUARDNAME.RANDOM.SIGNATURE using som private
+func (g *Guard) newState() string {
+	// see https://stackoverflow.com/questions/26132066/\
+	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
+	randomBytes := make([]byte, 32)
+	_, _ = randRead(randomBytes)
+	// both random value and the signature must be usable in a url
+	random := hex.EncodeToString(randomBytes)
+	signature := g.sec.sign(random)
+	return g.Name + "." + random + "." + signature
 }
+
+var randRead = rand.Read
