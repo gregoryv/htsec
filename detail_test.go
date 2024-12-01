@@ -2,9 +2,11 @@ package htsec
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -24,16 +26,30 @@ func TestDetail_GuardURL(t *testing.T) {
 }
 
 func TestDetail_Authorize(t *testing.T) {
+	// fake oauth2 service
+	mx := http.NewServeMux()
+	mx.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("content-type", "application/json")
+		json.NewEncoder(w).Encode(map[string]any{
+			"access_token": "TOKEN",
+		})
+	})
+	srv := httptest.NewServer(mx)
+	defer srv.Close()
+
 	g := &Guard{
 		Name: "a",
 		Config: oauth2.Config{
-			RedirectURL:  "http://example.com/redirect",
+			RedirectURL:  "...",
 			ClientID:     "abc",
 			ClientSecret: "secret",
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "http://127.0.0.1/auth",
-				TokenURL: "http://127.0.0.1/token",
+				AuthURL:  srv.URL + "/auth",
+				TokenURL: srv.URL + "/token",
 			},
+		},
+		Contact: func(c *http.Client) (*Contact, error) {
+			return &Contact{Name: "John"}, nil
 		},
 	}
 	sec := NewDetail(g)
@@ -42,7 +58,7 @@ func TestDetail_Authorize(t *testing.T) {
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
-	if _, err := sec.Authorize(ctx, r); err == nil {
+	if _, err := sec.Authorize(ctx, r); err != nil {
 		t.Error(err)
 	}
 }

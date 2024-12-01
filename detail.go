@@ -98,7 +98,7 @@ func (s *Detail) sign(random string) string {
 	hash := sha256.New()
 	hash.Write([]byte(random))
 	hash.Write(s.PrivateKey)
-	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
+	return base64.URLEncoding.EncodeToString(hash.Sum(nil))
 }
 
 var (
