@@ -37,7 +37,43 @@ func TestDetail_Authorize(t *testing.T) {
 	srv := httptest.NewServer(mx)
 	defer srv.Close()
 
-	g := &Guard{
+	g := newTestGuard(srv)
+	sec := NewDetail(g)
+	ctx := context.Background()
+	state := g.newState()
+	path := "/callback?code=hepp&state=" + state
+	r, _ := http.NewRequest("GET", path, http.NoBody)
+
+	if _, err := sec.Authorize(ctx, r); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestDetail_Authorize_exchangeErr(t *testing.T) {
+	// fake oauth2 service
+	mx := http.NewServeMux()
+	mx.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("content-type", "application/json")
+		fmt.Fprint(w, "{}") // ie. missing access_token
+	})
+	srv := httptest.NewServer(mx)
+	defer srv.Close()
+
+	g := newTestGuard(srv)
+	sec := NewDetail(g)
+	ctx := context.Background()
+	state := g.newState()
+	path := "/callback?code=hepp&state=" + state
+	r, _ := http.NewRequest("GET", path, http.NoBody)
+
+	_, err := sec.Authorize(ctx, r)
+	if err := contains(err.Error(), "missing access_token"); err != nil {
+		t.Error(err)
+	}
+}
+
+func newTestGuard(srv *httptest.Server) *Guard {
+	return &Guard{
 		Name: "a",
 		Config: oauth2.Config{
 			RedirectURL:  "...",
@@ -51,15 +87,6 @@ func TestDetail_Authorize(t *testing.T) {
 		Contact: func(c *http.Client) (*Contact, error) {
 			return &Contact{Name: "John"}, nil
 		},
-	}
-	sec := NewDetail(g)
-	ctx := context.Background()
-	state := g.newState()
-	path := "/callback?code=hepp&state=" + state
-	r, _ := http.NewRequest("GET", path, http.NoBody)
-
-	if _, err := sec.Authorize(ctx, r); err != nil {
-		t.Error(err)
 	}
 }
 
