@@ -29,12 +29,13 @@ type Detail struct {
 }
 
 // GuardURL returns url to the gate.
-func (s *Detail) GuardURL(name string) (string, error) {
+func (s *Detail) GuardURL(name, dest string) (string, error) {
 	g, err := s.guard(name)
 	if err != nil {
 		return "", fmt.Errorf("GuardURL: %w", err)
 	}
-	return g.url()
+	state := g.newState(dest)
+	return g.AuthCodeURL(state), nil
 }
 
 func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
@@ -75,10 +76,10 @@ func (s *Detail) guard(name string) (*Guard, error) {
 
 var notFound = fmt.Errorf("not found")
 
-// verify GUARDNAME.RAND.SIGNATURE
+// verify GUARDNAME.RAND.SIGNATURE.DEST
 func (s *Detail) verify(state string) (*Guard, error) {
 	parts := strings.Split(state, ".")
-	if len(parts) != 3 {
+	if len(parts) != 4 {
 		return nil, fmt.Errorf("%w: invalid format", ErrState)
 	}
 	// check if guard is part of the security detail

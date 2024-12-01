@@ -5,4 +5,4 @@ be noted in this file.
 
 ## [0.1.0-dev]
 
-- Add types Detail and Guard
+- Add types Detail, Guard, Slip and Contact

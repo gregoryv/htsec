@@ -1,9 +1,21 @@
 package htsec
 
-import "golang.org/x/oauth2"
+import (
+	"strings"
+
+	"golang.org/x/oauth2"
+)
 
 type Slip struct {
 	State   string
 	Token   *oauth2.Token
 	Contact *Contact
+}
+
+func (s *Slip) Dest() string {
+	parts := strings.Split(s.State, ".")
+	if len(parts) < 4 {
+		return ""
+	}
+	return parts[3]
 }

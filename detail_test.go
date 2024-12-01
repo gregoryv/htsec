@@ -17,10 +17,10 @@ func TestDetail_GuardURL(t *testing.T) {
 	sec := NewDetail(
 		&Guard{Name: "a"},
 	)
-	if _, err := sec.GuardURL("a"); err != nil {
+	if _, err := sec.GuardURL("a", "/mypath?x=2"); err != nil {
 		t.Error(err)
 	}
-	if _, err := sec.GuardURL("john"); err == nil {
+	if _, err := sec.GuardURL("john", "/"); err == nil {
 		t.Error("unknown guard should fail")
 	}
 }
@@ -40,7 +40,7 @@ func TestDetail_Authorize(t *testing.T) {
 	g := newTestGuard(srv)
 	sec := NewDetail(g)
 	ctx := context.Background()
-	state := g.newState()
+	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
@@ -68,7 +68,7 @@ func TestDetail_Authorize_contactErr(t *testing.T) {
 	}
 	sec := NewDetail(g)
 	ctx := context.Background()
-	state := g.newState()
+	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
@@ -90,7 +90,7 @@ func TestDetail_Authorize_exchangeErr(t *testing.T) {
 	g := newTestGuard(srv)
 	sec := NewDetail(g)
 	ctx := context.Background()
-	state := g.newState()
+	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
@@ -124,9 +124,9 @@ func TestDetail_Authorize_stateErr(t *testing.T) {
 	)
 	ctx := context.Background()
 	cases := map[string]string{
-		"x.RAND.SIGN": "x",
-		"a.RAND.SIGN": "invalid signature",
-		"a.b":         "invalid format",
+		"x.RAND.SIGN.DEST": "x",
+		"a.RAND.SIGN.DEST": "invalid signature",
+		"a.b":              "invalid format",
 	}
 	for state, expect := range cases {
 		t.Run(state, func(t *testing.T) {

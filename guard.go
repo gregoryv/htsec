@@ -26,14 +26,8 @@ func (g *Guard) String() string {
 	return fmt.Sprintf("guard %s", g.Name)
 }
 
-// url returns url including state using oauth2 AuthCodeURL
-func (g *Guard) url() (string, error) {
-	state := g.newState()
-	return g.AuthCodeURL(state), nil
-}
-
-// newState returns a string GUARDNAME.RANDOM.SIGNATURE using som private
-func (g *Guard) newState() string {
+// newState returns a string GUARDNAME.RANDOM.SIGNATURE.DEST using som private
+func (g *Guard) newState(dest string) string {
 	// see https://stackoverflow.com/questions/26132066/\
 	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
 	randomBytes := make([]byte, 32)
@@ -41,5 +35,5 @@ func (g *Guard) newState() string {
 	// both random value and the signature must be usable in a url
 	random := hex.EncodeToString(randomBytes)
 	signature := g.sec.sign(random)
-	return g.Name + "." + random + "." + signature
+	return g.Name + "." + random + "." + signature + "." + dest
 }
