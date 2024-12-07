@@ -66,7 +66,7 @@ func (s *SecurityDetail) Authorize(r *http.Request) (*Slip, error) {
 	return slip, nil
 }
 
-// verify GUARDNAME.RAND.SIGNATURE.DEST
+// verify GUARDNAME.RANDOM.SIGNATURE.DESTINATION
 func (s *SecurityDetail) verify(state string) (*Guard, error) {
 	parts := strings.Split(state, ".")
 	if len(parts) != 4 {
@@ -105,6 +105,6 @@ var (
 	// ErrState indicates something in the state data is invalid
 	ErrState = fmt.Errorf("state")
 
-	// Used to indicate if named guard is not found
+	// ErrNotFound indicates named guard is not found
 	ErrNotFound = fmt.Errorf("not found")
 )

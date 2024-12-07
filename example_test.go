@@ -9,6 +9,9 @@ import (
 	"github.com/gregoryv/htsec/google"
 )
 
+// For a more complete example, see
+// https://github.com/gregoryv/servant
+
 func ExampleSecurityDetail_setup() {
 	sec := htsec.NewSecurityDetail(
 		// define guards that will protect resources
@@ -25,6 +28,7 @@ func NewRouter(sec *htsec.SecurityDetail) *http.ServeMux {
 	mx.Handle("/login", login(sec))
 	// reuse the same callback endpoint
 	mx.Handle("/oauth/redirect", callback(sec))
+
 	// everything else is private
 	mx.Handle("/", private())
 	return mx
@@ -62,12 +66,14 @@ func callback(sec *htsec.SecurityDetail) http.HandlerFunc {
 	}
 }
 
+// private returns handler of all protected endpoints
 func private() http.Handler {
 	mx := http.NewServeMux()
 	mx.HandleFunc("/inside", inside)
 	return protect(mx)
 }
 
+// protect wraps the given handler
 func protect(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// verify session, see callback
