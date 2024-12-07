@@ -1,3 +1,5 @@
+// Package htsec provides security detail of guards for protecting
+// your endpoints.
 package htsec
 
 import (

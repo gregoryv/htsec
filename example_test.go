@@ -9,7 +9,7 @@ import (
 	"github.com/gregoryv/htsec/google"
 )
 
-func ExampleDetail() {
+func ExampleSecurityDetail_setup() {
 	sec := htsec.NewSecurityDetail(
 		// define guards that will protect resources
 		github.Guard(),

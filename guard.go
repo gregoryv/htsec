@@ -3,7 +3,6 @@ package htsec
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"net/http"
 
 	"golang.org/x/oauth2"
@@ -22,11 +21,8 @@ type Guard struct {
 	sec *SecurityDetail
 }
 
-func (g *Guard) String() string {
-	return fmt.Sprintf("guard %s", g.Name)
-}
-
-// newState returns a string GUARDNAME.RANDOM.SIGNATURE.DEST using som private
+// newState returns a string GUARDNAME.RANDOM.SIGNATURE.DESTINATION
+// using som private
 func (g *Guard) newState(dest string) string {
 	// see https://stackoverflow.com/questions/26132066/\
 	//   what-is-the-purpose-of-the-state-parameter-in-oauth-authorization-request
