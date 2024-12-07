@@ -10,7 +10,7 @@ import (
 )
 
 // NewSecurityDetail returns a new group of guards. Names must be
-// unique.
+// unique and PrivateKey is a random 32 byte slice.
 func NewSecurityDetail(guards ...*Guard) *SecurityDetail {
 	s := SecurityDetail{
 		PrivateKey: make([]byte, 32),
@@ -25,8 +25,10 @@ func NewSecurityDetail(guards ...*Guard) *SecurityDetail {
 }
 
 type SecurityDetail struct {
+	// PrivateKey is used to verify the state during authorization.
 	PrivateKey []byte
-	guards     map[string]*Guard
+
+	guards map[string]*Guard
 }
 
 // GuardURL returns url to the gate.
