@@ -51,8 +51,7 @@ func login(sec *htsec.SecurityDetail) http.HandlerFunc {
 
 func callback(sec *htsec.SecurityDetail) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		slip, err := sec.Authorize(ctx, r)
+		slip, err := sec.Authorize(r)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return

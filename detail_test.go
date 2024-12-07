@@ -1,7 +1,6 @@
 package htsec
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,12 +38,11 @@ func TestSecurityDetail_Authorize(t *testing.T) {
 
 	g := newTestGuard(srv)
 	sec := NewSecurityDetail(g)
-	ctx := context.Background()
 	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
-	if _, err := sec.Authorize(ctx, r); err != nil {
+	if _, err := sec.Authorize(r); err != nil {
 		t.Error(err)
 	}
 }
@@ -67,12 +65,11 @@ func TestSecurityDetail_Authorize_contactErr(t *testing.T) {
 		return nil, broken
 	}
 	sec := NewSecurityDetail(g)
-	ctx := context.Background()
 	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
-	if _, err := sec.Authorize(ctx, r); err != broken {
+	if _, err := sec.Authorize(r); err != broken {
 		t.Error(err)
 	}
 }
@@ -89,12 +86,11 @@ func TestSecurityDetail_Authorize_exchangeErr(t *testing.T) {
 
 	g := newTestGuard(srv)
 	sec := NewSecurityDetail(g)
-	ctx := context.Background()
 	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
 	r, _ := http.NewRequest("GET", path, http.NoBody)
 
-	_, err := sec.Authorize(ctx, r)
+	_, err := sec.Authorize(r)
 	if err := contains(err.Error(), "missing access_token"); err != nil {
 		t.Error(err)
 	}
@@ -122,7 +118,6 @@ func TestSecurityDetail_Authorize_stateErr(t *testing.T) {
 	sec := NewSecurityDetail(
 		&Guard{Name: "a"},
 	)
-	ctx := context.Background()
 	cases := map[string]string{
 		"x.RAND.SIGN.DEST": "x",
 		"a.RAND.SIGN.DEST": "invalid signature",
@@ -133,7 +128,7 @@ func TestSecurityDetail_Authorize_stateErr(t *testing.T) {
 			path := "/callback?state=" + state
 			r, _ := http.NewRequest("GET", path, http.NoBody)
 
-			_, err := sec.Authorize(ctx, r)
+			_, err := sec.Authorize(r)
 			if err := stateErr(err, expect); err != nil {
 				t.Error(err)
 			}

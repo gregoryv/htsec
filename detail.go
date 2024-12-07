@@ -2,7 +2,6 @@
 package htsec
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -42,7 +41,7 @@ func (s *SecurityDetail) GuardURL(name, dest string) (string, error) {
 }
 
 // Authorize request based on the guardname in the request state.
-func (s *SecurityDetail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
+func (s *SecurityDetail) Authorize(r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 	g, err := s.verify(state)
@@ -50,6 +49,7 @@ func (s *SecurityDetail) Authorize(ctx context.Context, r *http.Request) (*Slip,
 		return nil, err
 	}
 	// get the token
+	ctx := r.Context()
 	token, err := g.Config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
