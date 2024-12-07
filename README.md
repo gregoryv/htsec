@@ -2,15 +2,8 @@
 
 ![](security_detail.svg)
 
-In the oauth2 flow the state is
-
-  GUARDNAME.RANDOM.SIGNATURE.DESTINATION
-
-The random value and signature are verified using the security detail
-private key.
-
-The destination part can be used by you as a way to redirect users to
-whatever they wanted to get in the first place.
+The security detail, with it's guards, protect your handlers.
+In the oauth2 flow the state parameter is signed and verified.
 
 
 ## Quick start
