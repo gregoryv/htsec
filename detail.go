@@ -1,5 +1,4 @@
-// Package htsec provides security detail of guards for protecting
-// your endpoints.
+// Package htsec provides security detail for your endpoints.
 package htsec
 
 import (
@@ -12,6 +11,8 @@ import (
 	"strings"
 )
 
+// NewSecurityDetail returns a new group of guards. Names must be
+// unique.
 func NewSecurityDetail(guards ...*Guard) *SecurityDetail {
 	s := SecurityDetail{
 		PrivateKey: make([]byte, 32),
@@ -40,6 +41,7 @@ func (s *SecurityDetail) GuardURL(name, dest string) (string, error) {
 	return g.AuthCodeURL(state), nil
 }
 
+// Authorize request based on the guardname in the request state.
 func (s *SecurityDetail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
