@@ -11,6 +11,7 @@ import (
 
 func ExampleDetail() {
 	sec := htsec.NewDetail(
+		// define guards that will protect resources
 		github.Guard(),
 		google.Guard(),
 	)
@@ -35,6 +36,7 @@ func frontpage(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
+// login handles requests for selecting login method
 func login(sec *htsec.Detail) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("use")

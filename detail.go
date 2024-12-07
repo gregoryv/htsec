@@ -65,17 +65,6 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 	return &slip, nil
 }
 
-// guard returns named service if included, error if not found.
-func (s *Detail) guard(name string) (*Guard, error) {
-	g, found := s.guards[name]
-	if !found {
-		return nil, fmt.Errorf("guard %s: %w", name, notFound)
-	}
-	return g, nil
-}
-
-var notFound = fmt.Errorf("not found")
-
 // verify GUARDNAME.RAND.SIGNATURE.DEST
 func (s *Detail) verify(state string) (*Guard, error) {
 	parts := strings.Split(state, ".")
@@ -95,6 +84,15 @@ func (s *Detail) verify(state string) (*Guard, error) {
 	return g, nil
 }
 
+// guard returns named service if included, error if not found.
+func (s *Detail) guard(name string) (*Guard, error) {
+	g, found := s.guards[name]
+	if !found {
+		return nil, fmt.Errorf("guard(%s): %w", name, ErrNotFound)
+	}
+	return g, nil
+}
+
 func (s *Detail) sign(random string) string {
 	hash := sha256.New()
 	hash.Write([]byte(random))
@@ -105,4 +103,7 @@ func (s *Detail) sign(random string) string {
 var (
 	// ErrState indicates something in the state data is invalid
 	ErrState = fmt.Errorf("state")
+
+	// Used to indicate if named guard is not found
+	ErrNotFound = fmt.Errorf("not found")
 )
