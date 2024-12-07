@@ -10,7 +10,7 @@ import (
 )
 
 func ExampleDetail() {
-	sec := htsec.NewDetail(
+	sec := htsec.NewSecurityDetail(
 		// define guards that will protect resources
 		github.Guard(),
 		google.Guard(),
@@ -19,7 +19,7 @@ func ExampleDetail() {
 	http.ListenAndServe(":8080", h)
 }
 
-func NewRouter(sec *htsec.Detail) *http.ServeMux {
+func NewRouter(sec *htsec.SecurityDetail) *http.ServeMux {
 	mx := http.NewServeMux()
 	mx.HandleFunc("/{$}", frontpage)
 	mx.Handle("/login", login(sec))
@@ -37,7 +37,7 @@ func frontpage(w http.ResponseWriter, r *http.Request) {
 }
 
 // login handles requests for selecting login method
-func login(sec *htsec.Detail) http.HandlerFunc {
+func login(sec *htsec.SecurityDetail) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := r.URL.Query().Get("use")
 		url, err := sec.GuardURL(name, "/")
@@ -49,7 +49,7 @@ func login(sec *htsec.Detail) http.HandlerFunc {
 	}
 }
 
-func callback(sec *htsec.Detail) http.HandlerFunc {
+func callback(sec *htsec.SecurityDetail) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		slip, err := sec.Authorize(ctx, r)

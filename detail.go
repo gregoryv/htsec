@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func NewDetail(guards ...*Guard) *Detail {
-	s := Detail{
+func NewSecurityDetail(guards ...*Guard) *SecurityDetail {
+	s := SecurityDetail{
 		PrivateKey: make([]byte, 32),
 		guards:     make(map[string]*Guard),
 	}
@@ -23,13 +23,13 @@ func NewDetail(guards ...*Guard) *Detail {
 	return &s
 }
 
-type Detail struct {
+type SecurityDetail struct {
 	PrivateKey []byte
 	guards     map[string]*Guard
 }
 
 // GuardURL returns url to the gate.
-func (s *Detail) GuardURL(name, dest string) (string, error) {
+func (s *SecurityDetail) GuardURL(name, dest string) (string, error) {
 	g, err := s.guard(name)
 	if err != nil {
 		return "", fmt.Errorf("GuardURL: %w", err)
@@ -38,7 +38,7 @@ func (s *Detail) GuardURL(name, dest string) (string, error) {
 	return g.AuthCodeURL(state), nil
 }
 
-func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
+func (s *SecurityDetail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) {
 	state := r.FormValue("state")
 	code := r.FormValue("code")
 	g, err := s.verify(state)
@@ -66,7 +66,7 @@ func (s *Detail) Authorize(ctx context.Context, r *http.Request) (*Slip, error) 
 }
 
 // verify GUARDNAME.RAND.SIGNATURE.DEST
-func (s *Detail) verify(state string) (*Guard, error) {
+func (s *SecurityDetail) verify(state string) (*Guard, error) {
 	parts := strings.Split(state, ".")
 	if len(parts) != 4 {
 		return nil, fmt.Errorf("%w: invalid format", ErrState)
@@ -85,7 +85,7 @@ func (s *Detail) verify(state string) (*Guard, error) {
 }
 
 // guard returns named service if included, error if not found.
-func (s *Detail) guard(name string) (*Guard, error) {
+func (s *SecurityDetail) guard(name string) (*Guard, error) {
 	g, found := s.guards[name]
 	if !found {
 		return nil, fmt.Errorf("guard(%s): %w", name, ErrNotFound)
@@ -93,7 +93,7 @@ func (s *Detail) guard(name string) (*Guard, error) {
 	return g, nil
 }
 
-func (s *Detail) sign(random string) string {
+func (s *SecurityDetail) sign(random string) string {
 	hash := sha256.New()
 	hash.Write([]byte(random))
 	hash.Write(s.PrivateKey)

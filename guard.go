@@ -19,7 +19,7 @@ type Guard struct {
 	// Used to read contact information once authorized
 	Contact func(client *http.Client) (*Contact, error)
 
-	sec *Detail
+	sec *SecurityDetail
 }
 
 func (g *Guard) String() string {

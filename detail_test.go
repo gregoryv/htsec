@@ -13,8 +13,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func TestDetail_GuardURL(t *testing.T) {
-	sec := NewDetail(
+func TestSecurityDetail_GuardURL(t *testing.T) {
+	sec := NewSecurityDetail(
 		&Guard{Name: "a"},
 	)
 	if _, err := sec.GuardURL("a", "/mypath?x=2"); err != nil {
@@ -25,7 +25,7 @@ func TestDetail_GuardURL(t *testing.T) {
 	}
 }
 
-func TestDetail_Authorize(t *testing.T) {
+func TestSecurityDetail_Authorize(t *testing.T) {
 	// fake oauth2 service
 	mx := http.NewServeMux()
 	mx.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +38,7 @@ func TestDetail_Authorize(t *testing.T) {
 	defer srv.Close()
 
 	g := newTestGuard(srv)
-	sec := NewDetail(g)
+	sec := NewSecurityDetail(g)
 	ctx := context.Background()
 	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
@@ -49,7 +49,7 @@ func TestDetail_Authorize(t *testing.T) {
 	}
 }
 
-func TestDetail_Authorize_contactErr(t *testing.T) {
+func TestSecurityDetail_Authorize_contactErr(t *testing.T) {
 	// fake oauth2 service
 	mx := http.NewServeMux()
 	mx.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +66,7 @@ func TestDetail_Authorize_contactErr(t *testing.T) {
 	g.Contact = func(*http.Client) (*Contact, error) {
 		return nil, broken
 	}
-	sec := NewDetail(g)
+	sec := NewSecurityDetail(g)
 	ctx := context.Background()
 	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
@@ -77,7 +77,7 @@ func TestDetail_Authorize_contactErr(t *testing.T) {
 	}
 }
 
-func TestDetail_Authorize_exchangeErr(t *testing.T) {
+func TestSecurityDetail_Authorize_exchangeErr(t *testing.T) {
 	// fake oauth2 service
 	mx := http.NewServeMux()
 	mx.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +88,7 @@ func TestDetail_Authorize_exchangeErr(t *testing.T) {
 	defer srv.Close()
 
 	g := newTestGuard(srv)
-	sec := NewDetail(g)
+	sec := NewSecurityDetail(g)
 	ctx := context.Background()
 	state := g.newState("/")
 	path := "/callback?code=hepp&state=" + state
@@ -118,8 +118,8 @@ func newTestGuard(srv *httptest.Server) *Guard {
 	}
 }
 
-func TestDetail_Authorize_stateErr(t *testing.T) {
-	sec := NewDetail(
+func TestSecurityDetail_Authorize_stateErr(t *testing.T) {
+	sec := NewSecurityDetail(
 		&Guard{Name: "a"},
 	)
 	ctx := context.Background()
