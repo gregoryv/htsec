@@ -1,5 +1,5 @@
 [gregoryv/htsec](https://pkg.go.dev/github.com/gregoryv/htsec)
-provides handler security using oauth2
+provides provides security detail for your endpoints
 
 ![](security_detail.svg)
 
