@@ -1,4 +1,3 @@
-// Package htsec provides security detail for your endpoints.
 package htsec
 
 import (
