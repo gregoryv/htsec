@@ -1,3 +1,4 @@
+// Package google provides a google.com guard
 package google
 
 import (
@@ -12,6 +13,11 @@ import (
 	"google.golang.org/api/people/v1"
 )
 
+// Guard uses environment variables
+//
+//	OAUTH_GOOGLE_REDIRECT_URL="..."
+//	OAUTH_GOOGLE_CLIENT_ID="..."
+//	OAUTH_GOOGLE_SECRET="...
 func Guard() *htsec.Guard {
 	return &htsec.Guard{
 		Name: "google",
@@ -22,11 +28,11 @@ func Guard() *htsec.Guard {
 			Scopes:       []string{"profile", "email"},
 			Endpoint:     endpoints.Google,
 		},
-		Contact: Contact,
+		Contact: contact,
 	}
 }
 
-func Contact(c *http.Client) (*htsec.Contact, error) {
+func contact(c *http.Client) (*htsec.Contact, error) {
 	ctx := context.Background()
 	service, err := people.NewService(ctx,
 		option.WithHTTPClient(c),
