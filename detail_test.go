@@ -63,7 +63,7 @@ func TestSecurityDetail_Authorize_contactErr(t *testing.T) {
 
 	g := newTestGuard(srv)
 	broken := fmt.Errorf("broken")
-	g.Contact = func(*http.Client) (*Contact, error) {
+	g.NewSlip = func(*http.Client) (*Slip, error) {
 		return nil, broken
 	}
 	sec := NewSecurityDetail(g)
@@ -112,8 +112,8 @@ func newTestGuard(srv *httptest.Server) *Guard {
 				TokenURL: srv.URL + "/token",
 			},
 		},
-		Contact: func(c *http.Client) (*Contact, error) {
-			return &Contact{Name: "John"}, nil
+		NewSlip: func(c *http.Client) (*Slip, error) {
+			return &Slip{Name: "John"}, nil
 		},
 	}
 }

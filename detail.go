@@ -53,16 +53,14 @@ func (s *SecurityDetail) Authorize(ctx context.Context, r *http.Request) (*Slip,
 
 	client := g.Config.Client(ctx, token)
 	// get user information from the Auth service
-	contact, err := g.Contact(client)
+	slip, err := g.NewSlip(client)
 	if err != nil {
 		return nil, err
 	}
-	slip := Slip{
-		State:   state,
-		Token:   token,
-		Contact: contact,
-	}
-	return &slip, nil
+	slip.State = state
+	slip.Token = token
+
+	return slip, nil
 }
 
 // verify GUARDNAME.RAND.SIGNATURE.DEST

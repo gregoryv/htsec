@@ -58,7 +58,7 @@ func callback(sec *htsec.SecurityDetail) http.HandlerFunc {
 			return
 		}
 		// setup session ...
-		_ = slip.Contact
+		_ = slip
 		http.Redirect(w, r, "/inside", http.StatusSeeOther)
 	}
 }

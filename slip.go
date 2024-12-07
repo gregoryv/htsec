@@ -7,9 +7,11 @@ import (
 )
 
 type Slip struct {
-	State   string
-	Token   *oauth2.Token
-	Contact *Contact
+	State string
+	Token *oauth2.Token
+
+	Name  string
+	Email string
 }
 
 func (s *Slip) Dest() string {

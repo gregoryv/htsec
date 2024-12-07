@@ -28,11 +28,11 @@ func Guard() *htsec.Guard {
 			Scopes:       []string{"profile", "email"},
 			Endpoint:     endpoints.Google,
 		},
-		Contact: contact,
+		NewSlip: newSlip,
 	}
 }
 
-func contact(c *http.Client) (*htsec.Contact, error) {
+func newSlip(c *http.Client) (*htsec.Slip, error) {
 	ctx := context.Background()
 	service, err := people.NewService(ctx,
 		option.WithHTTPClient(c),
@@ -48,16 +48,16 @@ func contact(c *http.Client) (*htsec.Contact, error) {
 		return nil, err
 	}
 
-	var u htsec.Contact
+	var slip htsec.Slip
 	if len(profile.EmailAddresses) > 0 {
-		u.Email = profile.EmailAddresses[0].Value
+		slip.Email = profile.EmailAddresses[0].Value
 	}
 	if len(profile.Names) > 0 {
 		n := profile.Names[0]
-		u.Name = n.GivenName + " " + n.FamilyName
-		if u.Name == "" {
-			u.Name = n.DisplayName
+		slip.Name = n.GivenName + " " + n.FamilyName
+		if slip.Name == "" {
+			slip.Name = n.DisplayName
 		}
 	}
-	return &u, nil
+	return &slip, nil
 }

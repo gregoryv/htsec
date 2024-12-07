@@ -17,7 +17,7 @@ type Guard struct {
 	oauth2.Config
 
 	// Used to read contact information once authorized
-	Contact func(client *http.Client) (*Contact, error)
+	NewSlip func(client *http.Client) (*Slip, error)
 
 	sec *SecurityDetail
 }

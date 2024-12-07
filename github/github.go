@@ -25,11 +25,11 @@ func Guard() *htsec.Guard {
 			ClientSecret: os.Getenv("OAUTH_GITHUB_SECRET"),
 			Endpoint:     endpoints.GitHub,
 		},
-		Contact: contact,
+		NewSlip: newSlip,
 	}
 }
 
-func contact(c *http.Client) (*htsec.Contact, error) {
+func newSlip(c *http.Client) (*htsec.Slip, error) {
 	r, _ := http.NewRequest(
 		"GET", "https://api.github.com/user", nil,
 	)
@@ -39,10 +39,10 @@ func contact(c *http.Client) (*htsec.Contact, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var u htsec.Contact
-	err = json.NewDecoder(resp.Body).Decode(&u)
+	var slip htsec.Slip
+	err = json.NewDecoder(resp.Body).Decode(&slip)
 	if err != nil {
 		return nil, err
 	}
-	return &u, nil
+	return &slip, nil
 }
