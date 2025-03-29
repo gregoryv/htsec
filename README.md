@@ -1,5 +1,5 @@
 [gregoryv/htsec](https://pkg.go.dev/github.com/gregoryv/htsec)
-provides provides security detail for your endpoints
+ provides security detail for your endpoints
 
 ![](security_detail.svg)
 
@@ -12,5 +12,5 @@ In the oauth2 flow the state parameter is signed and verified.
     go get github.com/gregoryv/htsec
 
 
-There is an reference example
+There is a reference example
 at [gregoryv/servant](https://github.com/gregoryv/servant).
